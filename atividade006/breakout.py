@@ -15,6 +15,9 @@ TRI_WIDTH = 60
 TRI_HEIGHT = 40
 TRI_SPEED = 8
 
+# BRAKE flag: 0 = always move forward, 1 = move only when W is pressed
+BRAKE = 0
+
 # Initialize pygame and window
 pygame.init()
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
@@ -106,17 +109,28 @@ class Ship:
 def main():
 	running = True
 	ship = Ship()
+	global BRAKE
+	w_pressed_last = False
 	while running:
 		for event in pygame.event.get():
 			if event.type == pygame.QUIT:
 				running = False
 		keys = pygame.key.get_pressed()
+		# Toggle BRAKE on W key press (edge detection)
+		if keys[pygame.K_w]:
+			if not w_pressed_last:
+				BRAKE = 1 - BRAKE
+			w_pressed_last = True
+		else:
+			w_pressed_last = False
 		if keys[pygame.K_a]:
 			ship.rotate(-5)
 		if keys[pygame.K_d]:
 			ship.rotate(5)
-		if keys[pygame.K_w]:
+		if BRAKE == 0:
 			ship.move_forward()
+		elif BRAKE == 1:
+			pass  # Only moves if toggled to 0
 		screen.fill(BLACK)
 		ship.draw(screen)
 		pygame.display.flip()
